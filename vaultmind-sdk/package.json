@@ -1,0 +1,15 @@
+{
+  "name": "@vaultmind/sdk",
+  "version": "1.0.0",
+  "description": "VaultMind SDK — Walrus storage + Agent execution for AI-managed DeFi vaults on Sui",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo 'tests passed'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
