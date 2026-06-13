@@ -169,7 +169,7 @@ module vaultmind::vault {
 
         // Add coin to vault balance
         let payment_balance = coin::into_balance(payment);
-        vault.balance = balance::join(vault.balance, payment_balance);
+        let _ = balance::join(&mut vault.balance, payment_balance);
 
         vault.total_shares = vault.total_shares + shares;
         vault.total_deposited = vault.total_deposited + amount;
@@ -216,7 +216,7 @@ module vaultmind::vault {
         object::delete(id);
 
         // Withdraw from vault balance
-        let withdrawn_balance = balance::withdraw(&mut vault.balance, amount);
+        let withdrawn_balance = balance::split(&mut vault.balance, amount);
         let withdrawal = coin::from_balance(withdrawn_balance, ctx);
 
         event::emit(Withdrawn {
