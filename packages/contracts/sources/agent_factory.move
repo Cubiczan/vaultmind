@@ -5,6 +5,7 @@ module vaultmind::agent_factory {
     use std::string::String;
     use sui::clock::Clock;
     use sui::event;
+    use sui::transfer;
 
     // ========== Events ==========
     public struct AgentVaultDeployed has copy, drop {
@@ -41,8 +42,8 @@ module vaultmind::agent_factory {
         clock: &Clock,
         ctx: &mut TxContext,
     ) {
-        // 1. Register strategy
-        let _strategy = vaultmind::strategy::register_strategy(
+        // 1. Register strategy and transfer to deployer
+        let strategy = vaultmind::strategy::register_strategy(
             strategy_registry,
             strategy_name,
             strategy_desc,
@@ -57,10 +58,11 @@ module vaultmind::agent_factory {
             clock,
             ctx,
         );
-        // Note: strategy is transferred to the caller (not shared)
+        // Note: strategy is transferred to the deployer
+        transfer::public_transfer(strategy, ctx.sender());
 
-        // 2. Register agent
-        let _agent = vaultmind::agent::register_agent(
+        // 2. Register agent and transfer to deployer
+        let agent = vaultmind::agent::register_agent(
             agent_registry,
             agent_name,
             agent_desc,
@@ -69,8 +71,7 @@ module vaultmind::agent_factory {
             clock,
             ctx,
         );
-
-        // 3. Create vault linked to strategy
+        transfer::public_transfer(agent, ctx.sender());
         vaultmind::vault::create_vault(
             vault_registry,
             walrus_config_id,

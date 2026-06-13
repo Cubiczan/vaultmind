@@ -96,10 +96,11 @@ module vaultmind::vault {
             protocol_fee_bps: 100,  // 1% protocol fee
             min_deposit: 1_000_000, // 0.001 SUI (in MIST)
         };
+        let registry_id = object::id(&registry);
         transfer::share_object(registry);
         event::emit(VaultCreated {
             vault_id: 0,
-            vault_object_id: object::id(&registry),
+            vault_object_id: registry_id,
             manager: ctx.sender(),
             strategy_walrus_id: string::utf8(b"init"),
             agent_id: string::utf8(b"system"),
@@ -137,11 +138,12 @@ module vaultmind::vault {
             balance: balance::zero(),
         };
 
+        let vault_id_obj = object::id(&vault);
         transfer::share_object(vault);
 
         event::emit(VaultCreated {
             vault_id,
-            vault_object_id: object::id(&vault),
+            vault_object_id: vault_id_obj,
             manager: ctx.sender(),
             strategy_walrus_id,
             agent_id,
