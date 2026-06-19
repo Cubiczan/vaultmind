@@ -228,6 +228,52 @@ vaultmind/
 └── README.md
 ```
 
+## MAPS Integration
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Built%20with-MAPS%20%7C%20Multi-Agent%20Pipeline%20Skills-blue" alt="MAPS" />
+</p>
+
+VaultMind's agentic vault system leverages the [MAPS framework](https://mojoaistudio.com/maps/) (Multi-Agent Pipeline Skills) for structured AI agent development and DeFi vault management.
+
+### APS Layer (Per-Agent Pipeline) — Phase Mapping
+
+| MAPS Phase | VaultMind Component |
+|------------|---------------------|
+| **A0 Alignment** | Agentic Vault pattern — off-chain AI agents control on-chain DeFi vaults |
+| **A1 Define** | Trading agent brief — strategy type, risk level, rebalance interval, position limits |
+| **A2 Design** | Agent identity model — Move contracts (Vault, Strategy, Agent, AgentFactory) |
+| **A3 Build** | Sui Move smart contracts, agent execution engine, Walrus SDK integration |
+| **A4 Equip** | Strategy configs (Walrus blobs), DEX integration tools, on-chain execution capabilities |
+| **A5 Evaluate** | Backtest results, Sharpe ratio, max drawdown, on-chain performance recording |
+| **A6 Deploy** | One-tx deploy via `AgentFactory`, Sui devnet/mainnet, Walrus storage upload |
+| **A7 Observe** | Dashboard — vault performance, AUM tracking, agent activity monitoring |
+| **A8 Improve** | Reputation-driven strategy refinement, fee split optimization from performance data |
+
+### Key MAPS Concepts Applied
+
+| Concept | VaultMind Implementation |
+|---------|--------------------------|
+| **Agent Roster (M2)** | On-chain agent registry with reputation scoring and auto-adjustment |
+| **Contracts (M3)** | Strategy → Agent → Vault binding via AgentFactory one-tx deploy |
+| **Capability Map (A4)** | Walrus strategy configs, backtest data, agent memory snapshots, audit logs |
+| **Observation (A7)** | Real-time dashboard — vault AUM, agent status, strategy backtest visualizations |
+| **Improvement (A8)** | Reputation auto-adjustment from execution results, strategy version updates on Walrus |
+
+### Recommended MAPS Skills
+
+| Skill | Use Case |
+|-------|----------|
+| `/foundation` | M0 preflight — DeFi vault domain, Sui/Walrus stack, strategy categories |
+| `/shape` | Validate Multi-Agent track (multiple strategy agents managing distinct vaults) |
+| `/define-agent` | Brief new trading agent types (e.g., cross-chain arbitrage, yield aggregation) |
+| `/build-agent++` | TDD-driven agent development for new strategy implementations |
+| `/design-experience++` | UX design for vault management dashboard with shadcn/ui |
+| `/evaluate-agent++` | Phoenix/LangSmith tracing for agent execution reasoning |
+| `/improve-agent` | Improvement backlog driven by reputation changes and vault performance |
+
+---
+
 ## Roadmap
 
 - [ ] Real Sui DEX integration (Cetus, Turbos, FlowX) via Sui SDK
