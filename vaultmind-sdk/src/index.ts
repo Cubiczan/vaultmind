@@ -2,3 +2,6 @@ export { uploadStrategyConfig, uploadBacktestResult, uploadAgentMemory, uploadAu
 export type { StrategyConfig, BacktestResult, AgentMemory, AuditLog, TradeRecord, PositionSnapshot, ExecutionEntry, WalrusUploadResult } from "./walrus";
 export { AgentEngine, DEMO_AGENTS } from "./agent-engine";
 export type { AgentSignal, AgentConfig } from "./agent-engine";
+export { ChpGate } from "./chp/gate";
+export type { ChpAction, ChpState, ProposedAction, ChpDecision, Provenance, RiskPolicy } from "./chp/gate";
+export { loadPolicy, defaultPolicy, defaultPolicyPath } from "./chp/policy";

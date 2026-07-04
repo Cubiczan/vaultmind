@@ -6,7 +6,7 @@
   "types": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "test": "echo 'tests passed'"
+    "test": "node --import ./test/loader.mjs --test test/*.test.ts"
   },
   "dependencies": {},
   "devDependencies": {

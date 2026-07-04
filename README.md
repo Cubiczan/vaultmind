@@ -149,6 +149,42 @@ VaultMind uses Walrus as the **immutable, verifiable storage layer** for everyth
 
 The SDK provides `uploadToWalrus()` / `downloadFromWalrus()` wrappers around the Walrus publisher/aggregator APIs, plus structured types for each data category.
 
+## Decision Governance (CHP gate)
+
+Every capital-moving vault action passes through a **CHP-style decision gate**
+(`vaultmind-sdk/src/chp/`) before execution — a TypeScript port of the
+Consensus Hardening Protocol pattern from the `cleanmandate` /
+`swarmfi-executor` donor repos.
+
+**Policy** lives in
+[`vaultmind-sdk/config/policy.yaml`](./vaultmind-sdk/config/policy.yaml):
+`max_notional_usd` (hard ceiling), `daily_notional_cap_usd`, `per_asset_limits`
+(per-token caps), a `hitl_threshold_usd` above which human approval is required,
+`allowed_actions`, and `min_confidence`. If the file is missing or unparseable
+the gate falls back to a conservative built-in default and logs a warning
+(non-breaking, no YAML dependency added).
+
+**Gate** (`src/chp/gate.ts`) drives each proposed action through decision states
+`EXPLORING → PROVISIONAL → LOCKED` (or `HITL_REQUIRED` / `BLOCKED`), runs a
+lightweight adversarial/sanity check (finite non-negative notional, minimum
+signal confidence), and records per-decision provenance (UUID, timestamp,
+SHA-256 content hash, per-claim results) in an append-only ledger.
+
+It is wired into `AgentEngine.executeSignal()`: every non-`hold` signal is run
+through `chpGate.evaluate(action)` before the vault is touched. Blocked or
+HITL-required signals are recorded as a failed `ExecutionEntry` (with the CHP
+reason and decision id) and are **not** applied. Inject a custom gate via
+`new AgentEngine(config, memory, chpGate)` and inspect provenance / grant
+approval via `engine.getChpGate()`.
+
+Run the gate tests (Node's native TypeScript support, no build step or extra
+dependencies):
+
+```bash
+cd vaultmind-sdk
+npm test
+```
+
 ## Quick Start
 
 ### Prerequisites

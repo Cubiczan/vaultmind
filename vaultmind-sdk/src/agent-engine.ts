@@ -5,6 +5,7 @@
  */
 
 import type { AgentMemory, PositionSnapshot, ExecutionEntry } from "./walrus";
+import { ChpGate, type ChpAction } from "./chp/gate";
 
 export interface AgentSignal {
   action: "buy" | "sell" | "hold" | "rebalance";
@@ -27,8 +28,9 @@ export class AgentEngine {
   private config: AgentConfig;
   private memory: AgentMemory;
   private signalCount = 0;
+  private chpGate: ChpGate;
 
-  constructor(config: AgentConfig, initialMemory?: AgentMemory) {
+  constructor(config: AgentConfig, initialMemory?: AgentMemory, chpGate?: ChpGate) {
     this.config = config;
     this.memory = initialMemory || {
       agentId: config.agentId,
@@ -38,6 +40,14 @@ export class AgentEngine {
       executionLog: [],
       updatedAt: new Date().toISOString(),
     };
+    // Decision-governance gate. Loads config/policy.yaml (conservative
+    // default if missing). Every capital-moving signal passes through it.
+    this.chpGate = chpGate ?? new ChpGate();
+  }
+
+  /** Expose the CHP gate for provenance inspection / human approval. */
+  getChpGate(): ChpGate {
+    return this.chpGate;
   }
 
   getMemory(): AgentMemory {
@@ -85,6 +95,38 @@ export class AgentEngine {
    */
   executeSignal(signal: AgentSignal, vaultId: string): ExecutionEntry {
     this.memory.state = "executing";
+
+    // ─── CHP decision gate (governance) ───────────────────────
+    // "hold" is not a capital-moving action; everything else is run
+    // through the policy gate. Blocked / HITL-required signals are
+    // recorded as a failed execution and NOT applied to the vault.
+    if (signal.action !== "hold") {
+      const chp = this.chpGate.evaluate({
+        action: signal.action as ChpAction,
+        asset: signal.token,
+        notionalUsd: signal.amount,
+        confidence: signal.confidence,
+        rationale: signal.reasoning,
+      });
+      if (!chp.allowed) {
+        const kind = chp.requiresHuman ? "requires human approval" : "blocked";
+        const gatedEntry: ExecutionEntry = {
+          timestamp: new Date().toISOString(),
+          action: `${signal.action} ${signal.token}`,
+          vaultId,
+          result: "failure",
+          details: `CHP gate ${kind} (${chp.state}): ${chp.reason} [decision ${chp.provenance.decisionId}]`,
+          profitDelta: 0,
+        };
+        this.memory.executionLog.unshift(gatedEntry);
+        if (this.memory.executionLog.length > 100) {
+          this.memory.executionLog = this.memory.executionLog.slice(0, 100);
+        }
+        this.memory.state = "waiting";
+        this.memory.updatedAt = new Date().toISOString();
+        return gatedEntry;
+      }
+    }
 
     // Simulate execution (always succeeds in demo)
     const profitDelta = signal.action === "sell"
